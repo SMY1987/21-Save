@@ -6,35 +6,39 @@ import java.util.zip.ZipOutputStream;
 public class SaveManager {
     public static void main(String[] args) {
 
-        GameProgress save1 = new GameProgress(100, 5, 3, 1500.5);
-        GameProgress save2 = new GameProgress(80, 3, 2, 950.0);
-        GameProgress save3 = new GameProgress(120, 7, 5, 2500.75);
-
-        String saveDirPath = "C:\\Users\\1\\Desktop\\Games\\savegames";
-
-        File saveDir = new File(saveDirPath);
-        if (!saveDir.exists()) {
-            saveDir.mkdirs();
+        String basePath = "C:\\Users\\1\\Desktop\\Games\\savegames";
+        createDirectory(basePath);
+        List<GameProgress> saves = List.of(
+                new GameProgress(100, 5, 3, 1500.5),
+                new GameProgress(80, 3, 2, 950.0),
+                new GameProgress(120, 7, 5, 2500.75)
+        );
+        List<String> savePaths = List.of(
+                basePath + "/save1.dat",
+                basePath + "/save2.dat",
+                basePath + "/save3.dat"
+        );
+        for (int i = 0; i < saves.size(); i++) {
+            saveGame(savePaths.get(i), saves.get(i));
         }
 
-        String savePath1 = saveDirPath + "/save1.dat";
-        String savePath2 = saveDirPath + "/save2.dat";
-        String savePath3 = saveDirPath + "/save3.dat";
-        saveGame(savePath1, save1);
-        saveGame(savePath2, save2);
-        saveGame(savePath3, save3);
+        String zipPath = basePath + "/saves.zip";
 
-        String zipPath = saveDirPath + "/saves.zip";
-        List<String> filePaths = List.of(savePath1, savePath2, savePath3);
-        zipFiles(zipPath, filePaths);
+        zipFiles(zipPath, savePaths);
 
-        for (String filePath : filePaths) {
-            File file = new File(filePath);
-            if (file.exists() && file.delete()) {
-                System.out.println("Файл " + filePath + " удалён");
-            } else {
-                System.out.println("Не удалось удалить файл " + filePath);
-            }
+        for (String filePath : savePaths) {
+            deleteFile(filePath);
+        }
+    }
+
+    private static void createDirectory(String fullPath) {
+        File directory = new File(fullPath);
+        if (!directory.exists() && directory.mkdirs()) {
+            System.out.println("Создана директория: " + fullPath);
+        } else if (directory.exists()) {
+            System.out.println("Директория уже существует: " + fullPath);
+        } else {
+            System.err.println("Не удалось создать директорию: " + fullPath);
         }
     }
 
@@ -71,6 +75,15 @@ public class SaveManager {
             System.out.println("Архив успешно создан: " + zipPath);
         } catch (IOException e) {
             System.err.println("Ошибка при создании архива: " + e.getMessage());
+        }
+    }
+
+    private static void deleteFile(String filePath) {
+        File file = new File(filePath);
+        if (file.exists() && file.delete()) {
+            System.out.println("Файл " + filePath + " удалён");
+        } else {
+            System.out.println("Не удалось удалить файл " + filePath);
         }
     }
 }
